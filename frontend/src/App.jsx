@@ -5,6 +5,8 @@ import {Route,BrowserRouter as Router,Routes} from 'react-router-dom'
 import ImportantTasks from './pages/ImportantTasks'
 import CompletedTasks from './pages/CompletedTasks'
 import IncompletedTasks from './pages/IncompletedTasks'
+import Signup from './pages/Signup'
+import Login from './pages/Login'
 
 function App() {
 
@@ -19,6 +21,8 @@ function App() {
             <Route path='/completedtasks' element={<CompletedTasks />} />
             <Route path='/incompletedtasks' element={<IncompletedTasks />} />
           </Route>
+          <Route path='/signup' element={<Signup />} />
+          <Route path='/login' element={<Login />} />
         </Routes>
       </Router>
     </div>
