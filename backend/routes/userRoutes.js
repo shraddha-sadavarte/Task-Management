@@ -1,13 +1,14 @@
 import express from 'express';
 import User from '../models/user.js';  
 import bcryptjs from 'bcryptjs'; 
+import jwt from 'jsonwebtoken';
 
 const router = express.Router();
 
 // Sign-in API
 router.post('/sign-in', async (req, res) => {
   try {
-    const { username, email, password } = req.body; // Correct destructuring
+    const { username, email, password } = req.body; 
 
     // Validate username length first
     if (!username || username.length < 4) {
@@ -36,6 +37,37 @@ router.post('/sign-in', async (req, res) => {
   } catch (error) {
     console.error('Error in sign-in:', error);
     res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+//login
+router.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Check if the user exists
+    const existingUser = await User.findOne({ username });
+    if (!existingUser) {
+      return res.status(400).json({ message: "Username or password is incorrect" });
+    }
+
+    // Compare passwords
+    const isPasswordValid = await bcryptjs.compare(password, existingUser.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // Create JWT token
+    const token = jwt.sign(
+      { userId: existingUser._id, username: existingUser.username },
+      "tscmTM", // Replace with process.env.JWT_SECRET
+      { expiresIn: "2d" }
+    );
+
+    res.status(200).json({ id: existingUser._id, token });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
