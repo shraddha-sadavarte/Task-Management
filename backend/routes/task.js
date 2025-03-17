@@ -1,42 +1,42 @@
 import express from "express";
 import Task from "../models/task.js";
 import User from "../models/user.js";
-import mongoose from "mongoose";
+import authenticateUser from "../middleware/auth.js";
 
 const router = express.Router();
 
+// Protected Route: Create Task
 router.post("/create-task", async (req, res) => {
     try {
-        const { title, description, userId } = req.body; // ✅ Make sure to send `description` and `userId`
-
-        // Validate required fields
-        if (!title || !description || !userId) {
-            return res.status(400).json({ message: "Title, description, and userId are required" });
-        }
-
-        // Validate user ID format
-        if (!mongoose.Types.ObjectId.isValid(userId)) {
-            return res.status(400).json({ message: "Invalid User ID" });
-        }
-
-        // Check if the user exists
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        // Create a new task
-        const newTask = new Task({ title, description, user: userId });
-        const savedTask = await newTask.save();
-
-        // Update the user document with the new task
-        await User.findByIdAndUpdate(userId, { $push: { tasks: savedTask._id } });
-
-        res.status(201).json({ message: "Task Created", taskId: savedTask._id });
+      console.log("Headers:", req.headers); // Debugging
+      console.log("Request Body:", req.body); // Debugging
+  
+      const { title, description } = req.body;
+      const userId = req.headers.id; // Assuming user ID is sent in headers
+  
+      if (!title || !description) {
+        return res.status(400).json({ message: "Title and description are required" });
+      }
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+  
+      // Create new task
+      const newTask = new Task({ title, description, user: userId });
+      const savedTask = await newTask.save();
+  
+      // Add task to the user's task list
+      await User.findByIdAndUpdate(userId, { $push: { tasks: savedTask._id } });
+  
+      res.status(200).json({ message: "Task Created Successfully", task: savedTask });
+  
     } catch (error) {
-        console.error("Error creating task:", error);
-        res.status(500).json({ message: "Internal server error" });
+      console.error("Error creating task:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
-});
+  });
+  
+  
 
 export default router;
