@@ -46,7 +46,7 @@ router.post("/create-task", async (req, res) => {
       }
   
       // Find user and populate tasks
-      const userData = await User.findById(id).populate("tasks");
+      const userData = await User.findById(id).populate({path:"tasks", options: {sort :{ createdAt: -1}}});
   
       if (!userData) {
         return res.status(404).json({ message: "User not found" });
@@ -55,6 +55,41 @@ router.post("/create-task", async (req, res) => {
       res.status(200).json({ tasks: userData.tasks });
     } catch (error) {
       console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  //delete task
+  router.delete("/delete-task/:taskId", async (req, res) => {
+    try {
+      const { taskId } = req.params;
+      const { id: userId } = req.headers; // User ID from headers for validation
+  
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required in headers" });
+      }
+  
+      // Find the task to check ownership
+      const task = await Task.findById(taskId);
+  
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+  
+      // Ensure the task belongs to the authenticated user
+      if (task.user.toString() !== userId) {
+        return res.status(403).json({ message: "Unauthorized to delete this task" });
+      }
+  
+      // Delete the task
+      await Task.findByIdAndDelete(taskId);
+  
+      // Remove the task reference from the user's tasks array
+      await User.findByIdAndUpdate(userId, { $pull: { tasks: taskId } });
+  
+      res.status(200).json({ message: "Task deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting task:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
