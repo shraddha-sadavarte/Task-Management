@@ -1,7 +1,6 @@
 import express from "express";
 import Task from "../models/task.js";
 import User from "../models/user.js";
-import authenticateUser from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -33,6 +32,29 @@ router.post("/create-task", async (req, res) => {
   
     } catch (error) {
       console.error("Error creating task:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  router.get("/get-all-tasks", async (req, res) => {
+    try {
+      const { id } = req.headers;
+  
+      // Validate user ID
+      if (!id) {
+        return res.status(400).json({ message: "User ID is required in headers" });
+      }
+  
+      // Find user and populate tasks
+      const userData = await User.findById(id).populate("tasks");
+  
+      if (!userData) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      res.status(200).json({ tasks: userData.tasks });
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
       res.status(500).json({ message: "Internal server error" });
     }
   });
