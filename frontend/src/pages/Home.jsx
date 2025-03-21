@@ -1,8 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Sidebar from '../components/home/Sidebar.jsx'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 
 function Home() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if(location.state?.message){
+      alert(location.state.message);
+    }
+  }, [location]);
   return (
     <div className='flex h-[98vh] gap-4'>
         {/* width: 16.666667%; */}

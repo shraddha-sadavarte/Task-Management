@@ -28,9 +28,9 @@ const Login = () => {
       
       setData({ username: "", password: "" }); //Clear input fields
       
-      alert(`Logged in successfully!\nUser ID: ${id}`); // ✅ Show success message
+      //alert(`Logged in successfully!\nUser ID: ${id}`); // ✅ Show success message
       
-      navigate("/"); // Redirect to home page
+      navigate("/", {state: { message: "Login Successful!"} }); // Redirect to home page
   
     } catch (error) {
       console.error(error); 
