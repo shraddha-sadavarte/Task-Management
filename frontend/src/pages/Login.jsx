@@ -1,10 +1,11 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { React, useState } from 'react';
+import { Link,useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useDispatch } from "react-redux";
+import {authActions} from "../store/auth";
 
 const Login = () => {
+  const dispatch = useDispatch(); 
   const [data,setData]= useState({username:"",password:""});
   const change = (e) => {
     const {name,value} = e.target;
@@ -20,7 +21,10 @@ const Login = () => {
       }
   
       const response = await axios.post("http://localhost:1000/api/v1/login", data);
-      
+
+      //store login state in redux
+      dispatch(authActions.login());
+      localStorage.setItem("isLoggedIn","true"); //store token in localstorage(optional)
       console.log(response.data); // Debugging: Check API response
       
       // Extract correct data
@@ -28,9 +32,9 @@ const Login = () => {
       
       setData({ username: "", password: "" }); //Clear input fields
       
-      //alert(`Logged in successfully!\nUser ID: ${id}`); // ✅ Show success message
+      alert(`Logged in successfully!\nUser ID: ${id}`); // ✅ Show success message
       
-      navigate("/", {state: { message: "Login Successful!"} }); // Redirect to home page
+      navigate("/"); // Redirect to home page
   
     } catch (error) {
       console.error(error); 

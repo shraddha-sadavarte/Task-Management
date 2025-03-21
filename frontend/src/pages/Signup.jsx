@@ -1,16 +1,25 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {Link} from 'react-router-dom'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn) || localStorage.getItem("isLoggedIn") === "true";
+
+  useEffect(()=>{
+    if(isLoggedIn){
+      navigate("/")
+    }
+  }, [isLoggedIn, navigate]);
+  
   const [data,setData]= useState({username:"",email:"",password:""});
   const change = (e) => {
     const {name,value} = e.target;
     setData({...data, [name]: value})
   }
 
-  const navigate = useNavigate();
   const submit = async() => {
     try{
       if(data.username==="" || data.email==="" || data.password===""){
