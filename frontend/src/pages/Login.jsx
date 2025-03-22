@@ -25,6 +25,7 @@ const Login = () => {
       //store login state in redux
       dispatch(authActions.login());
       localStorage.setItem("isLoggedIn","true"); //store token in localstorage(optional)
+      localStorage.setItem("id", response.data.id);
       console.log(response.data); // Debugging: Check API response
       
       // Extract correct data

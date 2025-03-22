@@ -1,58 +1,78 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CiHeart } from 'react-icons/ci';
 import { FaEdit } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { IoAddCircleSharp } from 'react-icons/io5';
+import axios from 'axios';
 
-const Cards = ({ home, setShowModal }) => {  // ✅ Destructure home correctly
+const Cards = ({ home, setShowModal }) => {
+  const [tasks, setTasks] = useState([]); // ✅ Store user-specific tasks
+  const userId = localStorage.getItem("id"); // ✅ Get user ID from localStorage
 
-  // Store data as state so each card has its own status
-  const [data, setData] = useState([
-    { id: 1, title: "The Best Coding Channel", desc: "I have to create my channel; the best ever coding channel in Hindi for those who do not understand English.", status: "Incomplete" },
-    { id: 2, title: "CPP Concepts", desc: "I need to clear basics of C++. Topics: Abstraction, Inheritance, Encapsulation, Polymorphism.", status: "Incomplete" },
-    { id: 3, title: "Insem study", desc: "My insem on 14th March, I need to study.", status: "Incomplete" },
-    { id: 4, title: "Projects", desc: "I need to create at least 2 projects until BE.", status: "Incomplete" }
-  ]);
+  // ✅ Fetch user tasks from backend
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!userId) {
+        console.error("User ID not found in localStorage");
+        return;
+      }
 
-  // Toggle the button for the specific card
+      try {
+        const response = await axios.get("http://localhost:1000/api/v2/get-all-tasks", {
+          headers: { id: userId },
+        });
+        setTasks(response.data.tasks); // ✅ Store tasks in state
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+
+    fetchTasks();
+  }, [userId]); // ✅ Run when userId changes
+
+  // ✅ Toggle Task Completion Status
   const toggleImportant = (id) => {
-    setData((prevData) =>
-      prevData.map((item) =>
-        item.id === id
-          ? { ...item, status: item.status === "Incomplete" ? "Complete" : "Incomplete" }
-          : item
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task._id === id ? { ...task, status: task.status === "Incomplete" ? "Complete" : "Incomplete" } : task
       )
     );
   };
 
   return (
     <div className='grid grid-cols-3 gap-4 p-4'>
-      {data.map((items) => (
-        <div key={items.id} className='flex flex-col justify-between bg-gray-700 rounded-sm p-4'>
-          <div>
-            <h3 className='text-xl font-semibold'>{items.title}</h3>
-            <p className='text-gray-300 my-2'>{items.desc}</p>
-          </div>
-          <div className='mt-4 w-full flex items-center'>
-            <button
-              onClick={() => toggleImportant(items.id)}
-              className={`${items.status === "Incomplete" ? "bg-red-400" : "bg-green-400"} text-black p-2 rounded`}
-            >
-              {items.status}
-            </button>
-            <div className='text-white p-2 w-3/6 text-2xl font-semibold flex justify-around'>
-              <button><CiHeart /></button>
-              <button><FaEdit /></button>
-              <button><MdDelete /></button>
+      {/* ✅ Show fetched tasks */}
+      {tasks.length > 0 ? (
+        tasks.map((task) => (
+          <div key={task._id} className='flex flex-col justify-between bg-gray-700 rounded-sm p-4'>
+            <div>
+              <h3 className='text-xl font-semibold'>{task.title}</h3>
+              <p className='text-gray-300 my-2'>{task.description}</p>
+            </div>
+            <div className='mt-4 w-full flex items-center'>
+              <button
+                onClick={() => toggleImportant(task._id)}
+                className={`${task.status === "Incomplete" ? "bg-red-400" : "bg-green-400"} text-black p-2 rounded`}
+              >
+                {task.status}
+              </button>
+              <div className='text-white p-2 w-3/6 text-2xl font-semibold flex justify-around'>
+                <button><CiHeart /></button>
+                <button><FaEdit /></button>
+                <button><MdDelete /></button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      ) : (
+        <p className="text-gray-400 text-center col-span-3">No tasks found.</p>
+      )}
 
-      {/* ✅ Fix: Add Task should now be visible when home is "true" */}
+      {/* ✅ "Add Task" button (visible only when home is true) */}
       {home === "true" && (
-        <div className='flex flex-col justify-center items-center bg-gray-700 rounded-sm p-4 text-gray-300 hover:cursor-pointer hover:scale-105 transition-all duration-300'
-            onClick={() => setShowModal(true)}
+        <div
+          className='flex flex-col justify-center items-center bg-gray-700 rounded-sm p-4 text-gray-300 hover:cursor-pointer hover:scale-105 transition-all duration-300'
+          onClick={() => setShowModal(true)}
         >
           <IoAddCircleSharp className='text-5xl' />
           <h2 className='text-2xl mt-4'>Add Task</h2>

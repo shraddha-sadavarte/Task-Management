@@ -39,7 +39,7 @@ router.post("/create-task", async (req, res) => {
   //get all tasks
   router.get("/get-all-tasks", async (req, res) => {
     try {
-      const { id } = req.headers;
+      const { id } = req.headers.id;
   
       // Validate user ID
       if (!id) {
