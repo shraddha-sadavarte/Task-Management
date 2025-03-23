@@ -36,29 +36,39 @@ router.post("/create-task", async (req, res) => {
     }
   });
 
-  //get all tasks
-  router.get("/get-all-tasks", async (req, res) => {
-    try {
-      const { id } = req.headers.id;
-  
-      // Validate user ID
-      if (!id) {
-        return res.status(400).json({ message: "User ID is required in headers" });
-      }
-  
-      // Find user and populate tasks
-      const userData = await User.findById(id).populate({path:"tasks", options: {sort :{ createdAt: -1}}});
-  
-      if (!userData) {
-        return res.status(404).json({ message: "User not found" });
-      }
-  
-      res.status(200).json({ tasks: userData.tasks });
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-      res.status(500).json({ message: "Internal server error" });
+ // get all tasks
+router.get("/get-all-tasks", async (req, res) => {
+  try {
+    console.log("🟢 Headers received:", req.headers);
+
+    const userId = req.headers.id;
+
+    // Validate user ID
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required in headers" });
     }
-  });
+
+    // Find user and populate tasks
+    const userData = await User.findById(userId).populate({
+      path: "tasks",
+      options: { sort: { createdAt: -1 } },
+    });
+
+    // Check if user exists
+    if (!userData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Ensure tasks exist
+    const tasks = userData.tasks || []; // Default to an empty array
+
+    res.status(200).json({ tasks });
+  } catch (error) {
+    console.error("❌ Error fetching tasks:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
   //delete task
   router.delete("/delete-task/:taskId", async (req, res) => {

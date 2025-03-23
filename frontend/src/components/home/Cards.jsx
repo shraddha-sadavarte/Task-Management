@@ -7,7 +7,7 @@ import axios from 'axios';
 
 const Cards = ({ home, setShowModal }) => {
   const [tasks, setTasks] = useState([]); // ✅ Store user-specific tasks
-  const userId = localStorage.getItem("id"); // ✅ Get user ID from localStorage
+  const userId = localStorage.getItem("id"); //Get user ID from localStorage
 
   // ✅ Fetch user tasks from backend
   useEffect(() => {
@@ -19,8 +19,9 @@ const Cards = ({ home, setShowModal }) => {
 
       try {
         const response = await axios.get("http://localhost:1000/api/v2/get-all-tasks", {
-          headers: { id: userId },
+          headers: { "id": userId },
         });
+        console.log("✅ Tasks fetched successfully:", response.data);
         setTasks(response.data.tasks); // ✅ Store tasks in state
       } catch (error) {
         console.error("Error fetching tasks:", error);

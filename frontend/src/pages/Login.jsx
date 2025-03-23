@@ -2,7 +2,6 @@ import { React, useState } from 'react';
 import { Link,useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useDispatch } from "react-redux";
-import {authActions} from "../store/auth";
 
 const Login = () => {
   const dispatch = useDispatch(); 
@@ -22,20 +21,23 @@ const Login = () => {
   
       const response = await axios.post("http://localhost:1000/api/v1/login", data);
 
-      //store login state in redux
-      dispatch(authActions.login());
+      if(response.data){
       localStorage.setItem("isLoggedIn","true"); //store token in localstorage(optional)
       localStorage.setItem("id", response.data.id);
       console.log(response.data); // Debugging: Check API response
       
       // Extract correct data
       const { accessToken, id } = response.data; // correctly access response data
+
+      //notify sidebar that user has logged in
+      window.dispatchEvent(new CustomEvent("userUpdated"));
       
       setData({ username: "", password: "" }); //Clear input fields
       
       alert(`Logged in successfully!\nUser ID: ${id}`); // ✅ Show success message
       
       navigate("/"); // Redirect to home page
+      }
   
     } catch (error) {
       console.error(error); 
