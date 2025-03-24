@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {CgNotes} from "react-icons/cg";
 import {MdLabelImportant} from 'react-icons/md';
 import {FaCheckDouble} from 'react-icons/fa6';
@@ -18,7 +18,7 @@ const Sidebar = () => {
         if (storedId) {
             console.log("🔍 Stored User ID from localStorage:", storedId); // Debugging log
 
-            axios.get(`http://localhost:1000/api/v1/user/${storedId}`)
+            axios.get(`http://localhost:1000/api/v1/${storedId}`)
                 .then(response => {
                     console.log("✅ Fetched user:", response.data); // Debugging log
                     setUser(response.data);
@@ -28,23 +28,6 @@ const Sidebar = () => {
                 });
         }
     }, [storedId]);
-
-//     //load when sidebar mounts
-//     useEffect(() => {
-//         fetchUser();
-//     },[]);
-
-//     //Listen for custom event "userUpdated" to update Sidebar when login/logout happens
-//   useEffect(() => {
-//     const handleUserUpdate = () => {
-//       fetchUser();
-//     };
-
-//     window.addEventListener("userUpdated", handleUserUpdate);
-//     return () => {
-//       window.removeEventListener("userUpdated", handleUserUpdate);
-//     };
-//   }, []);
 
     const data = [
         {
@@ -84,8 +67,8 @@ const Sidebar = () => {
     <>
      {/* user info */}
     <div>
-      <h2 className='text-xl font-semibold'>{user ? user.username : "Guest"}</h2>
-      <h4 className='mb-1 text-gray-200'>{user ? user.email : "guest@example.com"}</h4>
+      <h2 className='text-xl font-semibold'>{user? user.username:"Guest"}</h2>
+      <h4 className='mb-1 text-gray-200'>{user? user.email:"guest@example.com"}</h4>
       <hr />
     </div>
 
