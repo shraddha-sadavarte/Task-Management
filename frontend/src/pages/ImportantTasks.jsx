@@ -4,7 +4,7 @@ import Cards from '../components/home/Cards'
 const ImportantTasks = () => {
   return (
     <div>
-      <Cards home={"false"}/>
+      <Cards filter="important"/>
     </div>
   )
 }

@@ -287,5 +287,32 @@ router.put("/update-complete-task/:taskId", async (req, res) => {
       res.status(500).json({ message: "Internal server error" });
     }
   });
+
+  //Add Task API
+router.post("/add-task", async (req, res) => {
+  try {
+      const { title, description } = req.body;
+      const userId = req.headers.id;
+
+      if (!title || !description || !userId) {
+          return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      const newTask = new Task({
+          title,
+          description,
+          complete: false,
+          important: false,
+          userId,
+      });
+
+      const savedTask = await newTask.save();
+      res.status(201).json({ message: "Task added successfully", task: savedTask });
+
+  } catch (error) {
+      console.error("Error adding task:", error);
+      res.status(500).json({ message: "Internal server error" });
+  }
+});
   
 export default router;

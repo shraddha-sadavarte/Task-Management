@@ -1,40 +1,37 @@
-import React, { useState } from 'react'
-import {RxCross2} from 'react-icons/rx'
+import React, { useState } from 'react';
+import axios from 'axios';
 
-const InputData = ({ closeModal }) => {
-   
-    const [isOpen, setIsOpen] = useState(true); //controls visibility
+const InputTask = ({ closeModal }) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const userId = localStorage.getItem("id");
 
-    if(!isOpen) return null; //if model is closed, return nothing (hide it)
+  const addTask = async () => {
+    try {
+      await axios.post("http://localhost:1000/api/v2/add-task", {
+        title,
+        description
+      }, { headers: { "id": userId } });
+
+      closeModal(); // Close modal after adding task
+    } catch (error) {
+      console.error("Error adding task:", error);
+    }
+  };
+
   return (
-    <>
-      <div className='fixed top-0 left-0 bg-gray-800 opacity-50 h-screen w-full'></div>
-      <div className='fixed top-0 left-0 bg-gray-800 flex items-center justify-center opacity-80 h-screen w-full'>
-        <div className='w-2/6 bg-gray-900 p-4 rounded'>
-        <div className='flex justify-end'>
-            <button onClick={closeModal} className='text-white text-xl hover:text-red-500 transition'> 
-                <RxCross2 />
-            </button>
-        </div>
-            <input 
-                type='text' 
-                placeholder='Title' 
-                name='title' 
-                className='px-3 py-2 rounded w-full bg-gray-700 my-3'
-            />
-            <textarea 
-                name='' 
-                id='' 
-                cols="30" 
-                rows="10" 
-                placeholder='Description' 
-                className='px-3 py-2 bg-gray-700 w-full rounded my-3' 
-            />
-            <button className='px-3 py-2 bg-blue-400 rounded text-black text-xl font-semibold hover:cursor-pointer hover:bg-blue-500'>Submit</button>
-        </div>
+    <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded-lg">
+        <h2 className="text-xl mb-4">Add New Task</h2>
+        <input type="text" placeholder="Title" className="border p-2 mb-2 w-full"
+          value={title} onChange={(e) => setTitle(e.target.value)} />
+        <textarea placeholder="Description" className="border p-2 mb-2 w-full"
+          value={description} onChange={(e) => setDescription(e.target.value)} />
+        <button onClick={addTask} className="bg-blue-500 text-white px-4 py-2 rounded">Add Task</button>
+        <button onClick={closeModal} className="ml-2 text-gray-600">Cancel</button>
       </div>
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default InputData
+export default InputTask;
