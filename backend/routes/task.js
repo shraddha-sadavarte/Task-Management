@@ -289,30 +289,29 @@ router.put("/update-complete-task/:taskId", async (req, res) => {
   });
 
   //Add Task API
-router.post("/add-task", async (req, res) => {
-  try {
-      const { title, description } = req.body;
-      const userId = req.headers.id;
-
-      if (!title || !description || !userId) {
-          return res.status(400).json({ message: "Missing required fields" });
-      }
-
-      const newTask = new Task({
-          title,
-          description,
-          complete: false,
-          important: false,
-          userId,
-      });
-
-      const savedTask = await newTask.save();
-      res.status(201).json({ message: "Task added successfully", task: savedTask });
-
-  } catch (error) {
-      console.error("Error adding task:", error);
-      res.status(500).json({ message: "Internal server error" });
-  }
-});
+  router.post("/add-task", async (req, res) => {
+    try {
+      const { title, description, user } = req.body;
   
+      // Check if the user exists
+      const existingUser = await User.findById(user);
+      if (!existingUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      // Create new task
+      const newTask = new Task({ title, description, user });
+      await newTask.save();
+  
+      // Add task to user's task array
+      existingUser.tasks.push(newTask._id); // ✅ Add task ID to user
+      await existingUser.save(); // ✅ Save updated user document
+  
+      res.status(201).json({ message: "Task added successfully", task: newTask });
+    } catch (error) {
+      console.error("Error adding task:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  });
+
 export default router;

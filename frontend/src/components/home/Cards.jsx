@@ -7,7 +7,7 @@ import axios from 'axios';
 import EditTaskModal from '../../pages/EditTaskModel'; //Import Edit Modal Component
 import InputData from './InputData';
 
-const Cards = ({ filter, setShowModal }) => {
+const Cards = ({ filter }) => {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null); // Track the task being edited
   const userId = localStorage.getItem("id");
@@ -28,22 +28,25 @@ const Cards = ({ filter, setShowModal }) => {
   };
 
   // Fetch Tasks from Backend
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (!userId) return console.error("User ID not found in localStorage");
+ // Define function to refresh tasks
+ const fetchTasks = async () => {
+  if (!userId) return console.error("User ID not found in localStorage");
 
-      try {
-        const response = await axios.get(getTasksUrl(), {
-          headers: { "id": userId },
-        });
-        setTasks(response.data.tasks);
-      } catch (error) {
-        console.error("Error fetching tasks:", error);
-      }
-    };
+  try {
+    const response = await axios.get(getTasksUrl(), {
+      headers: { "id": userId },
+    });
+    console.log("✅ Updated Task List:", response.data.tasks);
+    setTasks(response.data.tasks);
+  } catch (error) {
+    console.error("❌ Error fetching tasks:", error);
+  }
+};
 
-    fetchTasks();
-  }, [userId, filter]);
+// Fetch tasks on component mount & filter change
+useEffect(() => {
+  fetchTasks();
+}, [userId, filter]);
 
   //Toggle Task Completion
   const toggleComplete = async (id) => {
@@ -92,6 +95,7 @@ const Cards = ({ filter, setShowModal }) => {
               <h3 className='text-xl font-semibold'>{task.title}</h3>
               <p className='text-gray-300 my-2'>{task.description}</p>
             </div>
+        
             <div className='mt-4 w-full flex items-center'>
               <button
                 onClick={() => toggleComplete(task._id)}
@@ -128,7 +132,7 @@ const Cards = ({ filter, setShowModal }) => {
       )}
 
       {/*show model for adding task*/}
-      {showModal && <InputData closeModal={()=>setShowModal(false)} />}
+      {showModal && <InputData closeModal={()=>setShowModal(false)} refreshTasks={fetchTasks}/>}
 
       {/* Show Edit Modal when task is selected */}
       {editingTask && (
